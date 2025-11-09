@@ -3,7 +3,7 @@ from config import WIDTH, HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT
 from assets import PLAYER_IMG, BACKGROUND
 
 
-class Jogador:
+class Player:
 
     def __init__(self, manager):
         # guarda referência ao gerenciador (para acessar assets)
@@ -31,4 +31,40 @@ class Jogador:
     def draw(self, surface):
         #desenha o carro
         surface.blit(self.image, self.rect)
+
+class GameScreen:
+    def __init__(self, manager):
+        self.manager = manager
+        self.assets = manager.assets
+        # carrega fonte (caso precise escrever algo, recomendado ser feito nas referencias)
+        try:
+            self.font = self.assets['game_font']
+        except:
+            self.font = pygame.font.SysFont(None, 24)
+        # fundo (imagem da rua)
+        self.background = self.assets[BACKGROUND]
+        self.bg_y = 0  # para scroll futuro
+        # cria o player
+        self.player = Player(manager)
+
+    def handle_event(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+            # Fecha o jogo com segurança
+                pygame.event.post(pygame.event.Event(pygame.QUIT))
+
+    def update(self, dt):
+        keys = pygame.key.get_pressed()
+        self.player.update(dt, keys)
+
+    def draw(self):
+        #desenha a tela
+        screen = self.manager.screen
+        # desenha o fundo
+        screen.blit(self.background, (0, 0))
+        # desenha o carro
+        self.player.draw(screen)
+        # texto de instrução
+        text = self.font.render("Use ← → para mover | ESC volta", True, (255, 255, 255))
+        screen.blit(text, (20, 20))
 
