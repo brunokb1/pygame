@@ -15,8 +15,9 @@ LINHA_DE_CHEGADA_IMG = 'linha_de_chegada_img'
 
 # sons
 MOEDA_SOUND = 'moeda_sound'
-BOOST_SOUND = 'boost_sound'
+CARRO_SOUND = 'boost_sound'
 FINISH_SOUND = 'finish_sound'
+CRASH_SOUND = 'crash_sound'
 
 # fonte
 GAME_FONT = 'game_font'
@@ -43,18 +44,10 @@ def load_assets():
     assets[LINHA_DE_CHEGADA_IMG] = pygame.transform.scale(assets[LINHA_DE_CHEGADA_IMG], (WIDTH, 80))
 
     # Sons 
-    try:
-        assets[MOEDA_SOUND] = pygame.mixer.Sound(os.path.join(SND_DIR, 'moeda.wav'))
-    except Exception:
-        assets[MOEDA_SOUND] = None
-    try:
-        assets[BOOST_SOUND] = pygame.mixer.Sound(os.path.join(SND_DIR, 'boost.wav'))
-    except Exception:
-        assets[BOOST_SOUND] = None
-    try:
-        assets[FINISH_SOUND] = pygame.mixer.Sound(os.path.join(SND_DIR, 'finish.wav'))
-    except Exception:
-        assets[FINISH_SOUND] = None
+    assets[MOEDA_SOUND] = pygame.mixer.Sound(os.path.join(SND_DIR, 'moeda.wav'))
+    assets[CARRO_SOUND] = pygame.mixer.Sound(os.path.join(SND_DIR, 'boost.wav'))
+    assets[FINISH_SOUND] = pygame.mixer.Sound(os.path.join(SND_DIR, 'finish.wav'))
+    assets[CRASH_SOUND] = pygame.mixer.Sound(os.path.join(SND_DIR, 'crash.wav'))
 
     # Fonte
     try:
