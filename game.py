@@ -62,12 +62,26 @@ class GameScreen:
         self.coin_count = 0
         # velocidade base do scroll
         self.scroll_speed = 200 
-        
+
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
             # Fecha o jogo com segurança
                 pygame.event.post(pygame.event.Event(pygame.QUIT))
+    #função corrigida pela ia 
+    def _spawn_objetos(self):
+        tipo = random.choice(["moeda", "obstaculo", "cone", "boost", None])
+        x = random.randint(40, WIDTH - 80)
+        y = -100  # começa acima da tela
+        if tipo == "moeda":
+            img = self.assets["moeda_img"]
+            self.moedas.append({"img": img, "rect": img.get_rect(topleft=(x, y))})
+        elif tipo == "boost":
+            img = self.assets["boost_img"]
+            self.boosts.append({"img": img, "rect": img.get_rect(topleft=(x, y))})
+        elif tipo in ["obstaculo", "cone"]:
+            img = self.assets["obstaculo_img"] if tipo == "obstaculo" else self.assets["cone_img"]
+            self.obstaculos.append({"img": img, "rect": img.get_rect(topleft=(x, y))})
 
     def update(self, dt):
         keys = pygame.key.get_pressed()
