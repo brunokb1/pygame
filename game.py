@@ -44,10 +44,25 @@ class GameScreen:
             self.font = pygame.font.SysFont(None, 24)
         # fundo (imagem da rua)
         self.background = self.assets[BACKGROUND]
-        self.bg_y = 0  # para scroll futuro
+        self.bg_y = 0 
         # cria o player
         self.player = Player(manager)
-
+        # listas para armazenar entidades do jogo
+        self.obstaculos = []   
+        self.boosts = []       
+        self.moedas = []       
+        # controle de spawn
+        self.spawn_timer = 0
+        self.spawn_interval = 1200  
+        # controle de boost
+        self.boost_ativo = False
+        self.boost_timer = 0
+        self.boost_duracao = 1500  
+        # contador de moedas
+        self.coin_count = 0
+        # velocidade base do scroll
+        self.scroll_speed = 200 
+        
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
