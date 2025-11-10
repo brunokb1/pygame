@@ -1,9 +1,9 @@
-# main.py (teste rápido)
+
 import pygame
 
 pygame.init()
 screen = pygame.display.set_mode((480, 700))
-pygame.display.set_caption("Teste Pygame")
+pygame.display.set_caption("Veloses e Furiosos")
 clock = pygame.time.Clock()
 running = True
 
