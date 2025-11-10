@@ -82,6 +82,19 @@ class GameScreen:
         elif tipo in ["obstaculo", "cone"]:
             img = self.assets["obstaculo_img"] if tipo == "obstaculo" else self.assets["cone_img"]
             self.obstaculos.append({"img": img, "rect": img.get_rect(topleft=(x, y))})
+        
+    def _ativar_boost(self):
+        #UTILIZAÇÃO try dada por ia 
+        self.scroll_speed = 400
+        self.boost_ativo = True
+        self.boost_timer = pygame.time.get_ticks()
+        try:
+            som = self.assets["boost_sound"]
+            if som:
+                som.play()
+        except Exception:
+            pass
+
 
     def update(self, dt):
         keys = pygame.key.get_pressed()
