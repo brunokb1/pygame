@@ -1,4 +1,5 @@
 import pygame
+import random
 from config import WIDTH, HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT
 from assets import PLAYER_IMG, BACKGROUND
 
