@@ -51,17 +51,18 @@ class GameScreen:
         self.obstaculos = []   
         self.boosts = []       
         self.moedas = []       
-    # controle de spawn
+        # controle de spawn
         self.spawn_timer = 0
         self.spawn_interval = 1200  
-# controle de boost
+        # controle de boost
         self.boost_ativo = False
         self.boost_timer = 0
         self.boost_duracao = 1500  
-# contador de moedas
+        # contador de moedas
         self.coin_count = 0
-# velocidade base do scroll
-        self.scroll_speed = 200
+        # velocidade base do scroll
+        self.scroll_speed = 200 
+        
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
