@@ -99,8 +99,56 @@ class GameScreen:
     def update(self, dt):
         keys = pygame.key.get_pressed()
         self.player.update(dt, keys)
+        # movimenta o fundo (scroll)
+        self.bg_y += self.scroll_speed * dt
+        if self.bg_y >= HEIGHT:
+            self.bg_y = 0
+        # controla tempo para spawnar novos objetos
+        self.spawn_timer += dt * 1000
+        if self.spawn_timer > self.spawn_interval:
+            self._spawn_objetos()
+            self.spawn_timer = 0
+        # movimenta obstáculos
+        for obj in self.obstaculos[:]:
+            obj["rect"].y += self.scroll_speed * dt
+            if obj["rect"].top > HEIGHT:
+                self.obstaculos.remove(obj)
+            elif obj["rect"].colliderect(self.player.rect):
+                print("💥 Colisão com obstáculo!")
+                self.scroll_speed = 150  # reduz velocidade
 
+        # movimenta moedas
+        for m in self.moedas[:]:
+            m["rect"].y += self.scroll_speed * dt
+            if m["rect"].top > HEIGHT:
+                self.moedas.remove(m)
+            elif m["rect"].colliderect(self.player.rect):
+                # coleta moeda (vale o dobro se boost ativo)
+                ganho = 2 if self.boost_ativo else 1
+                self.coin_count += ganho
+                try:
+                    som = self.assets["coin_sound"]
+                    if som:
+                        som.play()
+                except Exception:
+                    pass
+                self.moedas.remove(m)
+
+        # movimenta boosts
+        for b in self.boosts[:]:
+            b["rect"].y += self.scroll_speed * dt
+            if b["rect"].top > HEIGHT:
+                self.boosts.remove(b)
+            elif b["rect"].colliderect(self.player.rect):
+                self._ativar_boost()
+                self.boosts.remove(b)
+
+        # desativa boost quando tempo acaba
+        if self.boost_ativo and pygame.time.get_ticks() - self.boost_timer > self.boost_duracao:
+            self.scroll_speed = 200
+            self.boost_ativo = False
     def draw(self):
+<<<<<<< HEAD
         screen = self.manager.screen
 
         # fundo
@@ -131,4 +179,15 @@ class GameScreen:
         if self.boost_ativo:
             boost_txt = self.font.render("BOOST ATIVO!", True, (255, 255, 255))
             screen.blit(boost_txt, (20, 50))
+=======
+            #desenha a tela
+        screen = self.manager.screen
+            # desenha o fundo
+        screen.blit(self.background, (0, 0))
+            # desenha o carro
+        self.player.draw(screen)
+            # texto de instrução
+        text = self.font.render("Use ← → para mover | ESC volta", True, (255, 255, 255))
+        screen.blit(text, (20, 20))
+>>>>>>> 722237faad6bfe0c952799cbca8fbb7f43effa42
 
