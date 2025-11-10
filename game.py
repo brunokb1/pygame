@@ -101,13 +101,34 @@ class GameScreen:
         self.player.update(dt, keys)
 
     def draw(self):
-        #desenha a tela
         screen = self.manager.screen
-        # desenha o fundo
-        screen.blit(self.background, (0, 0))
-        # desenha o carro
+
+        # fundo
+        screen.blit(self.background, (0, self.bg_y))
+        screen.blit(self.background, (0, self.bg_y - HEIGHT))
+
+        # desenha obstáculos
+        for obj in self.obstaculos:
+            screen.blit(obj["img"], obj["rect"])
+
+        # desenha moedas
+        for m in self.moedas:
+            screen.blit(m["img"], m["rect"])
+
+        # desenha boosts
+        for b in self.boosts:
+            screen.blit(b["img"], b["rect"])
+
+        # desenha o jogador
         self.player.draw(screen)
-        # texto de instrução
-        text = self.font.render("Use ← → para mover | ESC volta", True, (255, 255, 255))
-        screen.blit(text, (20, 20))
+
+        # texto de HUD
+        texto_moedas = f"Moedas: {self.coin_count}"
+        cor = (255, 255, 0)
+        hud = self.font.render(texto_moedas, True, cor)
+        screen.blit(hud, (20, 20))
+
+        if self.boost_ativo:
+            boost_txt = self.font.render("BOOST ATIVO!", True, (255, 255, 255))
+            screen.blit(boost_txt, (20, 50))
 
