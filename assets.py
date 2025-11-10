@@ -1,7 +1,7 @@
 # assets.py
 import pygame
 import os
-from config import IMG_DIR, SND_DIR, FNT_DIR, WIDTH
+from config import IMG_DIR, SND_DIR, FNT_DIR, WIDTH, HEIGHT
 from config import PLAYER_WIDTH, PLAYER_HEIGHT, COIN_SIZE, OBSTACLE_WIDTH, OBSTACLE_HEIGHT, BOOST_SIZE
 
 # chaves dos assets
@@ -34,6 +34,7 @@ def load_assets():
     assets[LINHA_DE_CHEGADA_IMG] = pygame.image.load(os.path.join(IMG_DIR, 'finish_line.png')).convert_alpha()
 
     # Escala 
+    assets[BACKGROUND] = pygame.transform.scale(assets[BACKGROUND], (WIDTH, HEIGHT))
     assets[PLAYER_IMG] = pygame.transform.scale(assets[PLAYER_IMG], (PLAYER_WIDTH, PLAYER_HEIGHT))
     assets[MOEDA_IMG]  = pygame.transform.scale(assets[MOEDA_IMG], (COIN_SIZE, COIN_SIZE))
     assets[OBSTACULO_IMG] = pygame.transform.scale(assets[OBSTACULO_IMG], (OBSTACLE_WIDTH, OBSTACLE_HEIGHT))
