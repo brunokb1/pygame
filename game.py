@@ -1,7 +1,7 @@
 import pygame
 import random
 from config import WIDTH, HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT, LANES, LANE_WIDTH, FINISH_DISTANCE
-from assets import PLAYER_IMG, BACKGROUND
+from assets import PLAYER_IMG, BACKGROUND, MOEDA_IMG, BOOST_IMG, OBSTACULO_IMG, CONE_IMG, LINHA_DE_CHEGADA_IMG, GAME_OVER_IMG, VITORIA_IMG
 
 class Player:
 
@@ -52,7 +52,7 @@ class GameScreen:
         self.moedas = []       
         # controle de spawn
         self.spawn_timer = 0
-        self.spawn_interval = 1200  
+        self.spawn_interval = 300
         # controle de boost
         self.boost_ativo = False
         self.boost_timer = 0
@@ -66,7 +66,7 @@ class GameScreen:
         self.distance_travelled = 0
 
         # posiciona a linha de chegada no mapa 
-        finish_img = self.assets.get('linha_de_chegada_img') or self.assets.get('LINHA_DE_CHEGADA_IMG')
+        finish_img = self.assets.get(LINHA_DE_CHEGADA_IMG)
         if finish_img:
             finish_rect = finish_img.get_rect(topleft=(0, -FINISH_DISTANCE))
             self.finish = {'img': finish_img, 'rect': finish_rect}
@@ -82,24 +82,41 @@ class GameScreen:
             if event.key == pygame.K_ESCAPE:
             # Fecha o jogo com segurança
                 pygame.event.post(pygame.event.Event(pygame.QUIT))
-    #função corrigida pela ia 
+        # corrigido por ia
+        if self.game_over and event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN:
+                pygame.event.post(pygame.event.Event(pygame.QUIT))
+
+    #função corrigida pela ia para aumentar a probabilidade de moedas e diminuir a de boosts
     def _spawn_objetos(self):
-        tipo = random.choice(["moeda", "obstaculo", "cone", "boost", None, None])  # mais None para espaçar
+        choices = ["moeda", "obstaculo", "cone", "boost", None]
+        weights = [0.6, 0.22, 0.08, 0.03, 0.07] 
+        tipo = random.choices(choices, weights=weights, k=1)[0]
+
         lane = random.randrange(0, LANES)
         x_center = lane * LANE_WIDTH + LANE_WIDTH // 2
-        y = -100  # começa acima da tela
+        y = -100
+
         if tipo == "moeda":
-            img = self.assets.get("moeda_img")
+            img = self.assets.get(MOEDA_IMG)
             if img:
                 rect = img.get_rect(center=(x_center, y))
                 self.moedas.append({"img": img, "rect": rect})
+
         elif tipo == "boost":
-            img = self.assets.get("boost_img")
+            img = self.assets.get(BOOST_IMG)
             if img:
                 rect = img.get_rect(center=(x_center, y))
                 self.boosts.append({"img": img, "rect": rect})
-        elif tipo in ["obstaculo", "cone"]:
-            img = self.assets.get("obstaculo_img") if tipo == "obstaculo" else self.assets.get("cone_img")
+
+        elif tipo == "obstaculo":
+            img = self.assets.get(OBSTACULO_IMG)
+            if img:
+                rect = img.get_rect(center=(x_center, y))
+                self.obstaculos.append({"img": img, "rect": rect})
+
+        elif tipo == "cone":
+            img = self.assets.get(CONE_IMG)
             if img:
                 rect = img.get_rect(center=(x_center, y))
                 self.obstaculos.append({"img": img, "rect": rect})
@@ -224,4 +241,24 @@ class GameScreen:
             boost_txt = self.font.render("BOOST ATIVO!", True, (255, 255, 255))
             screen.blit(boost_txt, (20, 50))
 
+        if self.game_over:
+            # pega as telas/imagens finais (usando as constantes do assets)
+            if self.won:
+                final_img = self.assets.get(VITORIA_IMG) 
+            else:
+                final_img = self.assets.get(GAME_OVER_IMG)
+
+            # desenha tela final caso exista
+            if final_img:
+                screen.blit(final_img, (0, 0))
+            else:
+                overlay = pygame.Surface((WIDTH, HEIGHT))
+                overlay.fill((0, 0, 0))
+                screen.blit(overlay, (0,0))
+
+            # escreve número de moedas 
+            sub = self.font.render(f"Moedas: {self.coin_count}", True, (255, 255, 0))
+            instr = self.font.render("Pressione ENTER para sair | ESC para fechar", True, (200, 200, 200))
+            screen.blit(sub, sub.get_rect(center=(WIDTH//2, HEIGHT//2 + 10)))
+            screen.blit(instr, instr.get_rect(center=(WIDTH//2, HEIGHT//2 + 50)))
 

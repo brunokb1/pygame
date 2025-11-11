@@ -8,13 +8,30 @@ def main():
     pygame.init()
     # cria janela
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption("Veloses e Furiosos")
+    pygame.display.set_caption("Velozes e Furiosos")
     # carrega assets (imagens e sons)
     assets = load_assets()
+    # mostra tela inicial (corrigido por ia)
+    tela_ini = assets.get('tela_inicial_img')
+    if tela_ini:
+        screen.blit(tela_ini, (0,0))
+        pygame.display.flip()
+        waiting = True
+        while waiting:
+            for e in pygame.event.get():
+                if e.type == pygame.QUIT:
+                    pygame.quit()
+                    return
+                if e.type == pygame.KEYDOWN:
+                    if e.key == pygame.K_RETURN:
+                        waiting = False 
+                    if e.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        return
     # clock para FPS
     clock = pygame.time.Clock()
     # cria tela do jogo
-    manager = type("Manager", (), {})()  # cria um objeto vazio para segurar 'screen' e 'assets'
+    manager = type("Manager", (), {})()  
     manager.screen = screen
     manager.assets = assets
     # cria GameScreen
@@ -32,6 +49,7 @@ def main():
         game_screen.draw()
         pygame.display.flip()
     pygame.quit()
+
 if __name__ == "__main__":
     main()
 
