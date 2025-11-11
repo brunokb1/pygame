@@ -15,6 +15,7 @@ BOOST_IMG = 'boost_img'
 LINHA_DE_CHEGADA_IMG = 'linha_de_chegada_img'
 TELA_INICIAL_IMG = 'tela_inicial_img'
 GAME_OVER_IMG = 'game_over_img'
+VITORIA_IMG = 'vitoria_img'
 
 # sons
 MOEDA_SOUND = 'moeda_sound'
@@ -38,6 +39,7 @@ def load_assets():
     assets[LINHA_DE_CHEGADA_IMG] = pygame.image.load(os.path.join(IMG_DIR, 'finish_line.png')).convert_alpha()
     assets[TELA_INICIAL_IMG] = pygame.image.load(os.path.join(IMG_DIR, 'tela_inicial.png')).convert_alpha()
     assets[GAME_OVER_IMG] = pygame.image.load(os.path.join(IMG_DIR, 'game_over.png')).convert_alpha()
+    assets[VITORIA_IMG] = pygame.image.load(os.path.join(IMG_DIR, 'vitoria.png')).convert_alpha()
 
     # Escala 
     assets[BACKGROUND] = pygame.transform.scale(assets[BACKGROUND], (WIDTH, HEIGHT))
@@ -49,6 +51,7 @@ def load_assets():
     assets[LINHA_DE_CHEGADA_IMG] = pygame.transform.scale(assets[LINHA_DE_CHEGADA_IMG], (WIDTH, 80))
     assets[TELA_INICIAL_IMG] = pygame.transform.scale(assets[TELA_INICIAL_IMG], (WIDTH, HEIGHT))
     assets[GAME_OVER_IMG] = pygame.transform.scale(assets[GAME_OVER_IMG], (WIDTH, HEIGHT))
+    assets[VITORIA_IMG] = pygame.transform.scale(assets[VITORIA_IMG_IMG], (WIDTH, HEIGHT))
 
     
     # Sons 
