@@ -1,8 +1,7 @@
 import pygame
 import random
-from config import WIDTH, HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT
+from config import WIDTH, HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT, LANES, LANE_WIDTH, FINISH_DISTANCE
 from assets import PLAYER_IMG, BACKGROUND
-
 
 class Player:
 
@@ -58,10 +57,25 @@ class GameScreen:
         self.boost_ativo = False
         self.boost_timer = 0
         self.boost_duracao = 1500  
+        self.coin_multiplier = 1
         # contador de moedas
         self.coin_count = 0
         # velocidade base do scroll
         self.scroll_speed = 200 
+        # distância percorrida 
+        self.distance_travelled = 0
+
+        # posiciona a linha de chegada no mapa 
+        finish_img = self.assets.get('linha_de_chegada_img') or self.assets.get('LINHA_DE_CHEGADA_IMG')
+        if finish_img:
+            finish_rect = finish_img.get_rect(topleft=(0, -FINISH_DISTANCE))
+            self.finish = {'img': finish_img, 'rect': finish_rect}
+        else:
+            self.finish = None
+
+        # estado do jogo
+        self.game_over = False  
+        self.won = False
 
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
@@ -70,33 +84,54 @@ class GameScreen:
                 pygame.event.post(pygame.event.Event(pygame.QUIT))
     #função corrigida pela ia 
     def _spawn_objetos(self):
-        tipo = random.choice(["moeda", "obstaculo", "cone", "boost", None])
-        x = random.randint(40, WIDTH - 80)
+        tipo = random.choice(["moeda", "obstaculo", "cone", "boost", None, None])  # mais None para espaçar
+        lane = random.randrange(0, LANES)
+        x_center = lane * LANE_WIDTH + LANE_WIDTH // 2
         y = -100  # começa acima da tela
         if tipo == "moeda":
-            img = self.assets["moeda_img"]
-            self.moedas.append({"img": img, "rect": img.get_rect(topleft=(x, y))})
+            img = self.assets.get("moeda_img")
+            if img:
+                rect = img.get_rect(center=(x_center, y))
+                self.moedas.append({"img": img, "rect": rect})
         elif tipo == "boost":
-            img = self.assets["boost_img"]
-            self.boosts.append({"img": img, "rect": img.get_rect(topleft=(x, y))})
+            img = self.assets.get("boost_img")
+            if img:
+                rect = img.get_rect(center=(x_center, y))
+                self.boosts.append({"img": img, "rect": rect})
         elif tipo in ["obstaculo", "cone"]:
-            img = self.assets["obstaculo_img"] if tipo == "obstaculo" else self.assets["cone_img"]
-            self.obstaculos.append({"img": img, "rect": img.get_rect(topleft=(x, y))})
+            img = self.assets.get("obstaculo_img") if tipo == "obstaculo" else self.assets.get("cone_img")
+            if img:
+                rect = img.get_rect(center=(x_center, y))
+                self.obstaculos.append({"img": img, "rect": rect})
         
     def _ativar_boost(self):
         #UTILIZAÇÃO try dada por ia 
-        self.scroll_speed = 400
         self.boost_ativo = True
+        self.coin_multiplier = 2
         self.boost_timer = pygame.time.get_ticks()
         try:
-            som = self.assets["boost_sound"]
+            som = self.assets.get("boost_sound") or self.assets.get("carro_sound")
             if som:
                 som.play()
         except Exception:
             pass
 
+    def _end_game(self, won=False):
+        # finaliza a execução do jogo (exibe tela de resultado)
+        self.game_over = True
+        self.won = won
+        # tocar som final 
+        if won:
+            s = self.assets.get('finish_sound')
+        else:
+            s = self.assets.get('crash_sound')
+        if s:
+            s.play()
 
     def update(self, dt):
+        # se o jogo acabou não atualiza mais
+        if self.game_over:
+            return
         keys = pygame.key.get_pressed()
         self.player.update(dt, keys)
         # movimenta o fundo (scroll)
@@ -110,33 +145,30 @@ class GameScreen:
             self.spawn_timer = 0
         # movimenta obstáculos
         for obj in self.obstaculos[:]:
-            obj["rect"].y += self.scroll_speed * dt
+            obj["rect"].y += int(self.scroll_speed * dt)
             if obj["rect"].top > HEIGHT:
                 self.obstaculos.remove(obj)
             elif obj["rect"].colliderect(self.player.rect):
-                print("💥 Colisão com obstáculo!")
-                self.scroll_speed = 150  # reduz velocidade
+                self._end_game(won=False)
 
         # movimenta moedas
+        # corrigido por ia
         for m in self.moedas[:]:
-            m["rect"].y += self.scroll_speed * dt
+            m["rect"].y += int(self.scroll_speed * dt)
             if m["rect"].top > HEIGHT:
                 self.moedas.remove(m)
             elif m["rect"].colliderect(self.player.rect):
-                # coleta moeda (vale o dobro se boost ativo)
-                ganho = 2 if self.boost_ativo else 1
+                # usa coin_multiplier (boost dobra a moeda)
+                ganho = self.coin_multiplier
                 self.coin_count += ganho
-                try:
-                    som = self.assets["coin_sound"]
-                    if som:
-                        som.play()
-                except Exception:
-                    pass
+                som = self.assets.get('moeda_sound')
+                if som:
+                    som.play()
                 self.moedas.remove(m)
 
         # movimenta boosts
         for b in self.boosts[:]:
-            b["rect"].y += self.scroll_speed * dt
+            b["rect"].y += int(self.scroll_speed * dt)
             if b["rect"].top > HEIGHT:
                 self.boosts.remove(b)
             elif b["rect"].colliderect(self.player.rect):
@@ -145,9 +177,16 @@ class GameScreen:
 
         # desativa boost quando tempo acaba
         if self.boost_ativo and pygame.time.get_ticks() - self.boost_timer > self.boost_duracao:
-            self.scroll_speed = 200
             self.boost_ativo = False
+            self.coin_multiplier = 1
             
+        # move a finish line junto com o scroll e checa vitória
+        if self.finish:
+            self.finish['rect'].y += int(self.scroll_speed * dt)
+            if self.finish['rect'].bottom > 0 and self.finish['rect'].top < HEIGHT:
+                # jogador cruzou a linha
+                self._end_game(won=True)
+
     def draw(self):
         screen = self.manager.screen
 
@@ -158,6 +197,11 @@ class GameScreen:
         # desenha obstáculos
         for obj in self.obstaculos:
             screen.blit(obj["img"], obj["rect"])
+
+        # desenha finish line se estiver chegando
+        if self.finish:
+            if -1000 < self.finish['rect'].y < HEIGHT + 200:
+                screen.blit(self.finish['img'], self.finish['rect'])
 
         # desenha moedas
         for m in self.moedas:
