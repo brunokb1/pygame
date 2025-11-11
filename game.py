@@ -90,7 +90,7 @@ class GameScreen:
     #função corrigida pela ia para aumentar a probabilidade de moedas e diminuir a de boosts
     def _spawn_objetos(self):
         choices = ["moeda", "obstaculo", "cone", "boost", None]
-        weights = [0.7, 0.1, 0.08, 0.03, 0.09] 
+        weights = [0.6, 0.1, 0.12, 0.03, 0.15] 
         tipo = random.choices(choices, weights=weights, k=1)[0]
 
         lane = random.randrange(0, LANES)
@@ -165,7 +165,10 @@ class GameScreen:
             obj["rect"].y += int(self.scroll_speed * dt)
             if obj["rect"].top > HEIGHT:
                 self.obstaculos.remove(obj)
-            elif obj["rect"].colliderect(self.player.rect):
+            # checa colisão com jogador
+            player_hitbox = self.player.rect.inflate(-PLAYER_WIDTH * 0.3, -PLAYER_HEIGHT * 0.3)
+            obj_hitbox = obj["rect"].inflate(-obj["rect"].width * 0.3, -obj["rect"].height * 0.3)
+            if obj_hitbox.colliderect(player_hitbox):
                 self._end_game(won=False)
 
         # movimenta moedas
