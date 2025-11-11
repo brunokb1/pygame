@@ -51,7 +51,7 @@ def load_assets():
     assets[LINHA_DE_CHEGADA_IMG] = pygame.transform.scale(assets[LINHA_DE_CHEGADA_IMG], (WIDTH, 80))
     assets[TELA_INICIAL_IMG] = pygame.transform.scale(assets[TELA_INICIAL_IMG], (WIDTH, HEIGHT))
     assets[GAME_OVER_IMG] = pygame.transform.scale(assets[GAME_OVER_IMG], (WIDTH, HEIGHT))
-    assets[VITORIA_IMG] = pygame.transform.scale(assets[VITORIA_IMG_IMG], (WIDTH, HEIGHT))
+    assets[VITORIA_IMG] = pygame.transform.scale(assets[VITORIA_IMG], (WIDTH, HEIGHT))
 
     
     # Sons 
