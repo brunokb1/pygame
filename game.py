@@ -148,7 +148,7 @@ class GameScreen:
             self.scroll_speed = 200
             self.boost_ativo = False
             
-        def draw(self):
+    def draw(self):
         screen = self.manager.screen
 
         # fundo
