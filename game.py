@@ -80,17 +80,17 @@ class GameScreen:
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-            # Fecha o jogo com segurança
+                # Fecha o jogo com segurança
                 pygame.event.post(pygame.event.Event(pygame.QUIT))
         # corrigido por ia
         if self.game_over and event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
-                pygame.event.post(pygame.event.Event(pygame.QUIT))
+                self.__init__(self.manager)
 
     #função corrigida pela ia para aumentar a probabilidade de moedas e diminuir a de boosts
     def _spawn_objetos(self):
         choices = ["moeda", "obstaculo", "cone", "boost", None]
-        weights = [0.6, 0.22, 0.08, 0.03, 0.07] 
+        weights = [0.7, 0.1, 0.08, 0.03, 0.09] 
         tipo = random.choices(choices, weights=weights, k=1)[0]
 
         lane = random.randrange(0, LANES)
@@ -242,23 +242,16 @@ class GameScreen:
             screen.blit(boost_txt, (20, 50))
 
         if self.game_over:
-            # pega as telas/imagens finais (usando as constantes do assets)
+            # pega as telas/imagens finais
             if self.won:
-                final_img = self.assets.get(VITORIA_IMG) 
+                final_img = self.assets.get('vitoria_img')  
             else:
-                final_img = self.assets.get(GAME_OVER_IMG)
-
-            # desenha tela final caso exista
-            if final_img:
-                screen.blit(final_img, (0, 0))
-            else:
-                overlay = pygame.Surface((WIDTH, HEIGHT))
-                overlay.fill((0, 0, 0))
-                screen.blit(overlay, (0,0))
-
+                final_img = self.assets.get('game_over_img')  
+            # desenha tela final 
+            screen.blit(final_img, (0, 0))
             # escreve número de moedas 
             sub = self.font.render(f"Moedas: {self.coin_count}", True, (255, 255, 0))
-            instr = self.font.render("Pressione ENTER para sair | ESC para fechar", True, (200, 200, 200))
-            screen.blit(sub, sub.get_rect(center=(WIDTH//2, HEIGHT//2 + 10)))
-            screen.blit(instr, instr.get_rect(center=(WIDTH//2, HEIGHT//2 + 50)))
+            screen.blit(sub, sub.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 20)))
+
+
 
