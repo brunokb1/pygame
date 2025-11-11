@@ -147,8 +147,8 @@ class GameScreen:
         if self.boost_ativo and pygame.time.get_ticks() - self.boost_timer > self.boost_duracao:
             self.scroll_speed = 200
             self.boost_ativo = False
-    def draw(self):
-<<<<<<< HEAD
+            
+        def draw(self):
         screen = self.manager.screen
 
         # fundo
@@ -179,15 +179,5 @@ class GameScreen:
         if self.boost_ativo:
             boost_txt = self.font.render("BOOST ATIVO!", True, (255, 255, 255))
             screen.blit(boost_txt, (20, 50))
-=======
-            #desenha a tela
-        screen = self.manager.screen
-            # desenha o fundo
-        screen.blit(self.background, (0, 0))
-            # desenha o carro
-        self.player.draw(screen)
-            # texto de instrução
-        text = self.font.render("Use ← → para mover | ESC volta", True, (255, 255, 255))
-        screen.blit(text, (20, 20))
->>>>>>> 722237faad6bfe0c952799cbca8fbb7f43effa42
+
 
