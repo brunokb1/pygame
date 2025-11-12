@@ -52,7 +52,7 @@ class GameScreen:
         self.moedas = []       
         # controle de spawn
         self.spawn_timer = 0
-        self.spawn_interval = 300
+        self.spawn_interval =450
         # controle de boost
         self.boost_ativo = False
         self.boost_timer = 0
@@ -64,7 +64,6 @@ class GameScreen:
         self.scroll_speed = 200 
         # distância percorrida 
         self.distance_travelled = 0
-
         # posiciona a linha de chegada no mapa 
         finish_img = self.assets.get(LINHA_DE_CHEGADA_IMG)
         if finish_img:
@@ -72,13 +71,13 @@ class GameScreen:
             self.finish = {'img': finish_img, 'rect': finish_rect}
         else:
             self.finish = None
-
         # estado do jogo
         self.game_over = False  
         self.won = False
-
         # se a linha de chegada já aparece na tela
         self.finish_visible = False
+        # limpa os objetos quando a linha aparecer
+        self.finish_cleared = False
 
 
     def handle_event(self, event):
@@ -94,7 +93,7 @@ class GameScreen:
     #função corrigida pela ia para aumentar a probabilidade de moedas e diminuir a de boosts
     def _spawn_objetos(self):
         choices = ["moeda", "obstaculo", "cone", "boost", None]
-        weights = [0.6, 0.1, 0.12, 0.03, 0.15] 
+        weights = [0.4, 0.2, 0.2, 0.06, 0.14] 
         tipo = random.choices(choices, weights=weights, k=1)[0]
 
         lane = random.randrange(0, LANES)
@@ -153,71 +152,77 @@ class GameScreen:
         # se o jogo acabou não atualiza mais
         if self.game_over:
             return
-        # se a linha de chegada já apareceu para de spawnar obstáculos e moedas
-        if self.finish_visible:
-            self.obstaculos.clear()
-            self.moedas.clear()
-            self.boosts.clear()
-            return
         keys = pygame.key.get_pressed()
         self.player.update(dt, keys)
         # movimenta o fundo (scroll)
         self.bg_y += self.scroll_speed * dt
         if self.bg_y >= HEIGHT:
             self.bg_y = 0
-        # controla tempo para spawnar novos objetos
-        self.spawn_timer += dt * 1000
-        if self.spawn_timer > self.spawn_interval:
-            self._spawn_objetos()
-            self.spawn_timer = 0
-        # movimenta obstáculos
+        # se a linha já apareceu não spawna novos objetos
+        if not self.finish_visible:
+            self.spawn_timer += dt * 1000
+            if self.spawn_timer > self.spawn_interval:
+                self._spawn_objetos()
+                self.spawn_timer = 0
+        # movimenta obstáculos 
         for obj in self.obstaculos[:]:
             obj["rect"].y += int(self.scroll_speed * dt)
             if obj["rect"].top > HEIGHT:
                 self.obstaculos.remove(obj)
-            # checa colisão com jogador
-            player_hitbox = self.player.rect.inflate(-PLAYER_WIDTH * 0.3, -PLAYER_HEIGHT * 0.3)
-            obj_hitbox = obj["rect"].inflate(-obj["rect"].width * 0.3, -obj["rect"].height * 0.3)
-            if obj_hitbox.colliderect(player_hitbox):
-                self._end_game(won=False)
-
-        # movimenta moedas
-        # corrigido por ia
+            else:
+                # checa colisão com jogador (hitboxes reduzidas)
+                player_hitbox = self.player.rect.inflate(-PLAYER_WIDTH * 0.45, -PLAYER_HEIGHT * 0.2)
+                obj_hitbox = obj["rect"].inflate(-obj["rect"].width * 0.35, -obj["rect"].height * 0.15)
+                if obj_hitbox.colliderect(player_hitbox):
+                    self._end_game(won=False)
+        # movimenta moedas 
         for m in self.moedas[:]:
             m["rect"].y += int(self.scroll_speed * dt)
             if m["rect"].top > HEIGHT:
                 self.moedas.remove(m)
-            elif m["rect"].colliderect(self.player.rect):
-                # usa coin_multiplier (boost dobra a moeda)
-                ganho = self.coin_multiplier
-                self.coin_count += ganho
-                som = self.assets.get('moeda_sound')
-                if som:
-                    som.play()
-                self.moedas.remove(m)
-
+            else:
+                # hitbox menor para evitar pegar moeda sem encostar (corrigida por ia)
+                player_hitbox = self.player.rect.inflate(-PLAYER_WIDTH * 0.35, -PLAYER_HEIGHT * 0.2)
+                coin_hitbox = m["rect"].inflate(-m["rect"].width * 0.4, -m["rect"].height * 0.4)
+                if coin_hitbox.colliderect(player_hitbox):
+                    ganho = self.coin_multiplier
+                    self.coin_count += ganho
+                    som = self.assets.get('moeda_sound')
+                    if som:
+                        som.play()
+                    self.moedas.remove(m)
         # movimenta boosts
         for b in self.boosts[:]:
             b["rect"].y += int(self.scroll_speed * dt)
             if b["rect"].top > HEIGHT:
                 self.boosts.remove(b)
-            elif b["rect"].colliderect(self.player.rect):
-                self._ativar_boost()
-                self.boosts.remove(b)
-
+            else:
+                player_hitbox = self.player.rect.inflate(-PLAYER_WIDTH * 0.35, -PLAYER_HEIGHT * 0.2)
+                boost_hitbox = b["rect"].inflate(-b["rect"].width * 0.4, -b["rect"].height * 0.4)
+                if boost_hitbox.colliderect(player_hitbox):
+                    self._ativar_boost()
+                    self.boosts.remove(b)
         # desativa boost quando tempo acaba
         if self.boost_ativo and pygame.time.get_ticks() - self.boost_timer > self.boost_duracao:
             self.boost_ativo = False
             self.coin_multiplier = 1
-            
-        # move a finish line junto com o scroll e checa vitória
+        # move a linha junto com o scroll e checa vitória
         if self.finish:
+            # move a linha
             self.finish['rect'].y += int(self.scroll_speed * dt)
-            # quando a linha começar a aparecer ativa o modo fim de corrida
-            if self.finish['rect'].bottom > 0:
+            # checa se a linha aparece na tela
+            if self.finish['rect'].bottom > HEIGHT * 0.25:
                 self.finish_visible = True
-            if self.finish['rect'].centery > self.player.rect.top:
+                # limpa objetos da tela
+                if not getattr(self, 'finish_cleared', False):
+                    self.obstaculos.clear()
+                    self.moedas.clear()
+                    self.boosts.clear()
+                    self.finish_cleared = True
+            # checa vitória
+            if self.finish['rect'].top >= self.player.rect.top:
                 self._end_game(won=True)
+
 
     def draw(self):
         screen = self.manager.screen
