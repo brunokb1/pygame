@@ -77,6 +77,10 @@ class GameScreen:
         self.game_over = False  
         self.won = False
 
+        # se a linha de chegada já aparece na tela
+        self.finish_visible = False
+
+
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
@@ -149,6 +153,12 @@ class GameScreen:
         # se o jogo acabou não atualiza mais
         if self.game_over:
             return
+        # se a linha de chegada já apareceu para de spawnar obstáculos e moedas
+        if self.finish_visible:
+            self.obstaculos.clear()
+            self.moedas.clear()
+            self.boosts.clear()
+            return
         keys = pygame.key.get_pressed()
         self.player.update(dt, keys)
         # movimenta o fundo (scroll)
@@ -201,13 +211,13 @@ class GameScreen:
             self.coin_multiplier = 1
             
         # move a finish line junto com o scroll e checa vitória
-        # Exemplo — declara vitória quando o centro da finish passa acima da frente do carro
         if self.finish:
             self.finish['rect'].y += int(self.scroll_speed * dt)
-            # condição alternativa mais "visual": só vence quando a linha passar pela frente do carro
+            # quando a linha começar a aparecer ativa o modo fim de corrida
+            if self.finish['rect'].bottom > 0:
+                self.finish_visible = True
             if self.finish['rect'].centery > self.player.rect.top:
                 self._end_game(won=True)
-
 
     def draw(self):
         screen = self.manager.screen
