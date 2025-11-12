@@ -56,7 +56,7 @@ class GameScreen:
         # controle de boost
         self.boost_ativo = False
         self.boost_timer = 0
-        self.boost_duracao = 1500  
+        self.boost_duracao = 2100 
         self.coin_multiplier = 1
         # contador de moedas
         self.coin_count = 0
@@ -172,7 +172,7 @@ class GameScreen:
             else:
                 # checa colisão com jogador (hitboxes reduzidas)
                 player_hitbox = self.player.rect.inflate(-PLAYER_WIDTH * 0.45, -PLAYER_HEIGHT * 0.2)
-                obj_hitbox = obj["rect"].inflate(-obj["rect"].width * 0.35, -obj["rect"].height * 0.15)
+                obj_hitbox = obj["rect"].inflate(-obj["rect"].width * 0.5, -obj["rect"].height * 0.18)
                 if obj_hitbox.colliderect(player_hitbox):
                     self._end_game(won=False)
         # movimenta moedas 
