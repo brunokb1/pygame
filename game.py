@@ -201,11 +201,13 @@ class GameScreen:
             self.coin_multiplier = 1
             
         # move a finish line junto com o scroll e checa vitória
+        # Exemplo — declara vitória quando o centro da finish passa acima da frente do carro
         if self.finish:
             self.finish['rect'].y += int(self.scroll_speed * dt)
-            if self.finish['rect'].bottom > 0 and self.finish['rect'].top < HEIGHT:
-                # jogador cruzou a linha
+            # condição alternativa mais "visual": só vence quando a linha passar pela frente do carro
+            if self.finish['rect'].centery > self.player.rect.top:
                 self._end_game(won=True)
+
 
     def draw(self):
         screen = self.manager.screen
@@ -220,8 +222,7 @@ class GameScreen:
 
         # desenha finish line se estiver chegando
         if self.finish:
-            if -1000 < self.finish['rect'].y < HEIGHT + 200:
-                screen.blit(self.finish['img'], self.finish['rect'])
+            screen.blit(self.finish['img'], self.finish['rect'])
 
         # desenha moedas
         for m in self.moedas:
