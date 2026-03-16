@@ -90,6 +90,13 @@ class GameScreen:
             if event.key == pygame.K_RETURN:
                 self.__init__(self.manager)
 
+    def _criar_sprite(self, img_key, x_center, y):
+        img = self.assets.get(img_key)
+        if img:
+            rect = img.get_rect(center=(x_center, y))
+            return {"img": img, "rect": rect}
+        return None
+
     #função corrigida pela ia para aumentar a probabilidade de moedas e diminuir a de boosts
     def _spawn_objetos(self):
         choices = ["moeda", "obstaculo", "cone", "boost", None]
@@ -101,28 +108,24 @@ class GameScreen:
         y = -100
 
         if tipo == "moeda":
-            img = self.assets.get(MOEDA_IMG)
-            if img:
-                rect = img.get_rect(center=(x_center, y))
-                self.moedas.append({"img": img, "rect": rect})
+            sprite = self._criar_sprite(MOEDA_IMG, x_center, y)
+            if sprite:
+                self.moedas.append(sprite)
 
         elif tipo == "boost":
-            img = self.assets.get(BOOST_IMG)
-            if img:
-                rect = img.get_rect(center=(x_center, y))
-                self.boosts.append({"img": img, "rect": rect})
+            sprite = self._criar_sprite(BOOST_IMG, x_center, y)
+            if sprite:
+                self.boosts.append(sprite)
 
         elif tipo == "obstaculo":
-            img = self.assets.get(OBSTACULO_IMG)
-            if img:
-                rect = img.get_rect(center=(x_center, y))
-                self.obstaculos.append({"img": img, "rect": rect})
+            sprite = self._criar_sprite(OBSTACULO_IMG, x_center, y)
+            if sprite:
+                self.obstaculos.append(sprite)
 
         elif tipo == "cone":
-            img = self.assets.get(CONE_IMG)
-            if img:
-                rect = img.get_rect(center=(x_center, y))
-                self.obstaculos.append({"img": img, "rect": rect})
+            sprite = self._criar_sprite(CONE_IMG, x_center, y)
+            if sprite:
+                self.obstaculos.append(sprite)
         
     def _ativar_boost(self):
         #UTILIZAÇÃO try dada por ia 
